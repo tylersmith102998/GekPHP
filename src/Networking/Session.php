@@ -16,16 +16,16 @@ class Session
      * If PHP sessions have been started.
      * @var bool
      */
-    private static $started = false;
+    private $started = false;
 
     /**
      * Sets a session value by name.
      * @param string $name variable name
      * @param mixed  $val  value
      */
-    public static function set($name, $val)
+    public function set($name, $val)
     {
-        static::check_start();
+        $this->check_start();
 
         $_SESSION[$name] = $val;
     }
@@ -35,9 +35,9 @@ class Session
      * @param  string $name variable name
      * @return mixed|false  result if found, false if not
      */
-    public static function get($name)
+    public function get($name)
     {
-        static::check_start();
+        $this->check_start();
 
         if (isset($_SESSION[$name]))
         {
@@ -52,12 +52,12 @@ class Session
      * haven't.
      * @return void
      */
-    private static function check_start()
+    private function check_start()
     {
-        if (!static::$started)
+        if (!$this->started)
         {
             session_start();
-            static::$started = true;
+            $this->started = true;
         }
     }
 
