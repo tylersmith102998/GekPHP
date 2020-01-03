@@ -9,6 +9,8 @@
 
 namespace Core;
 
+use \Networking\Session;
+
 class Controller
 {
 
@@ -31,6 +33,12 @@ class Controller
     protected $Plugin = null;
 
     /**
+     * Handler class for PHP sessions
+     * @var \Networking\Session
+     */
+    protected $Session = null;
+
+    /**
      * Initialize controller
      * @param string $name Controller name
      */
@@ -39,6 +47,7 @@ class Controller
         $this->controller_name = explode('\\', get_class($this))[1];
         $this->Model = new Models();
         $this->Plugin = new Plugins();
+        $this->Session = new Session();
     }
 
 }
