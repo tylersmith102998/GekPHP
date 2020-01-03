@@ -32,8 +32,6 @@ class HomeController extends \Core\BaseController
             'email'  => ['like', '%tedst@%'],
         ];
 
-        $this->test_var = $this->A->test_func();
-
         print_r($this->U->select([], $where, null, ['id', 'desc']));
 
         $this->view();
