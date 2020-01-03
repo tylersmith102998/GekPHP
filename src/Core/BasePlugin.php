@@ -30,7 +30,7 @@ class BasePlugin
 
         // Establish plugin directory
         $this->plugin_dir = PLUGINS . $name . DS;
-        echo $this->plugin_dir;
+        //echo $this->plugin_dir;
     }
 
 }
