@@ -1,2 +1,2 @@
 Index file<br />
-<?= $this->t('home/info'); ?>
+<?= $this->test_var; ?>
