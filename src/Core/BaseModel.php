@@ -67,7 +67,9 @@ class BaseModel
         // Get our DB connection.
         $this->DB = ClassRegistry::load('DB');
 
-        $this->table_name = strtolower(str_replace(['Models\\', 'Model'], '', $this->name));
+        $name = explode('\\', $this->name);
+        $name = strtolower(array_pop($name));
+        $this->table_name = str_replace('model', '', $name);
 
         if (!$this->DB->table_exists($this->table_name))
         {

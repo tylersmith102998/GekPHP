@@ -171,6 +171,7 @@ class DB
      */
     public function q($sql)
     {
+        //exit($sql);
         // Perform query using mysqli.
         $q = $this->con->query($sql);
 

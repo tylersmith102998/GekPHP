@@ -17,7 +17,19 @@ class BasePlugin
      * name)
      * @var string
      */
-    protected $plugin_dir = null;
+    public $plugin_dir = null;
+
+    /**
+     * Stores name of the plugin
+     * @var string
+     */
+    public $plugin_name = null;
+
+    /**
+     * Models handler that will be specific to each plugin.
+     * @var \Core\Models
+     */
+    protected $Model = null;
 
     /**
      * Gets the plugin name, establishes directory.
@@ -27,10 +39,13 @@ class BasePlugin
         // Get the name
         $name = explode('\\', get_class($this));
         $name = array_pop($name);
+        $this->plugin_name = $name;
 
         // Establish plugin directory
         $this->plugin_dir = PLUGINS . $name . DS;
         //echo $this->plugin_dir;
+
+        $this->Model = new Models($this);
     }
 
 }

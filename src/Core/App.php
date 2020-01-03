@@ -59,6 +59,7 @@ class App
             $this -> DB = new DB(Config::load('database.php'));
             ClassRegistry::load('DB', $this -> DB);
         }
+        // Remove FileNotFoundException??
         catch (MysqliException | FileNotFoundException $e)
         {
             exit($e); // Terminate with error messages.
