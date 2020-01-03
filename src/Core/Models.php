@@ -29,6 +29,31 @@ class Models
     private $loaded_models = [];
 
     /**
+     * The directory to use for searching for models.
+     * @var [type]
+     */
+    private $dir = null;
+
+    /**
+     * Holds the plugin object if class was passed one.
+     * @var \Core\BasePlugin|false
+     */
+    private $Plugin = false;
+
+    public function __construct($plugin = null)
+    {
+        if ($plugin == null)
+        {
+            $this->dir = MODELS;
+        }
+        else
+        {
+            $this->Plugin = $plugin;
+            $this->dir = $plugin->plugin_dir . 'Models' . DS;
+        }
+    }
+
+    /**
      * Loads in a Model and spits it's object back for immediate use.
      *
      * If already loaded, it will simply return the object.
@@ -42,7 +67,7 @@ class Models
         $name = ucfirst($name . 'Model');
 
         // Check if file exists
-        if (!file_exists(MODELS . $name . '.php'))
+        if (!file_exists($this->dir . $name . '.php'))
         {
             // Throw error if file not found.
             throw new ModelNotFoundException("Model '{$name}.php' not found. PHP File is missing.", 404);
@@ -52,11 +77,17 @@ class Models
         if (!isset($this->loaded_models[$name]))
         {
             // Load Model class file
-            require_once(MODELS . $name . '.php');
+            require_once($this->dir . $name . '.php');
 
             // Construct class name w/ namespacing.
             // All models should use namespace 'Models'
             $nsname = "\\Models\\" . $name;
+
+            if ($this->Plugin)
+            {
+                $plugin_name = ucfirst($this->Plugin->plugin_name);
+                $nsname = sprintf("\\Plugins\\%s\\Models\\%s", $plugin_name, $name);
+            }
 
             // Loads class into memory.
             $this->loaded_models[$name] = new $nsname();

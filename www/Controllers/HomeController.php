@@ -14,7 +14,7 @@ class HomeController extends \Core\BaseController
         parent::__construct($method, $args);
 
         try {
-            $this->U = $this->Model->load('users');
+            //$this->U = $this->Model->load('users');
             $this->A = $this->Plugin->load('Auth');
         } catch (FileNotFoundException $e) {
             exit($e);
@@ -23,16 +23,6 @@ class HomeController extends \Core\BaseController
 
     public function Index()
     {
-        $data = [
-            'email' => 'testssssssssss@test.org',
-            'password' => 'oofoffoff'
-        ];
-
-        $where = [
-            'email'  => ['like', '%tedst@%'],
-        ];
-
-        print_r($this->U->select([], $where, null, ['id', 'desc']));
 
         $this->view();
     }
