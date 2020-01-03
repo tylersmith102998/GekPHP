@@ -1,0 +1,59 @@
+@import 'https://fonts.googleapis.com/css?family=Exo';
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    font-size: 1.1em;
+}
+
+body {
+    background-image: url("https://c.wallhere.com/photos/cf/90/neon_lights_purple_neon_dark_stripes-1564607.jpg!d");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: rgba(255,255,255,0.9);
+    display: flex;
+
+    font-family: 'Exo';
+}
+
+div#central {
+    align-self: center;
+    justify-self: center;
+
+    width: 75%;
+    margin: 2em auto;
+    padding: 2em;
+
+    background: rgba(255,255,255,0.7);
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255,255,255,0.7), inset 0 0 20px rgba(255,255,255,0.9);
+}
+
+p.small-text {
+    font-size: .8em;
+    margin-top: .5em;
+}
+
+p#total-count {
+    margin: .5em auto;
+    width: 75%;
+
+    font-size: 2em;
+
+    color: #cc00cc;
+
+    background: #222;
+    padding: .3em;
+    border: 3px solid #000;
+    border-radius: 3px;
+    box-shadow:  0 0 10px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.9);
+    text-shadow: 0 0 10px rgba(255,0,255,0.7), 0 0 20px rgba(255,255,255,0.5);
+}
