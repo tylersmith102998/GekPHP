@@ -24,9 +24,11 @@ class BasePlugin
      */
     public function __construct()
     {
+        // Get the name
         $name = explode('\\', get_class($this));
         $name = array_pop($name);
 
+        // Establish plugin directory
         $this->plugin_dir = PLUGINS . $name . DS;
         echo $this->plugin_dir;
     }
