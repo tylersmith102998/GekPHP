@@ -5,7 +5,7 @@ $directory = $_SERVER['DOCUMENT_ROOT'];
 //$directory = '../admin';
 
 // Will exclude everything under these directories
-$exclude = array('dev_util', '.git');
+$exclude = array('dev_util', '.git', 'LICENSE');
 
 /**
  * @param SplFileInfo $file

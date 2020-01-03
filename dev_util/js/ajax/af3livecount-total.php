@@ -3,7 +3,7 @@
 $directory = $_SERVER['DOCUMENT_ROOT'];
 
 // Will exclude everything under these directories
-$exclude = array('dev_util', '.git');
+$exclude = array('dev_util', '.git', 'LICENSE');
 
 /**
  * @param SplFileInfo $file
