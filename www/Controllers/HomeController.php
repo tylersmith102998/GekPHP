@@ -23,17 +23,7 @@ class HomeController extends \Core\BaseController
 
     public function Index()
     {
-        $data = [
-            'email' => 'testssssssssss@test.org',
-            'password' => 'oofoffoff'
-        ];
-
-        $where = [
-            'email'  => ['like', '%tedst@%'],
-        ];
-
-        print_r($this->U->select([], $where, null, ['id', 'desc']));
-
+        
         $this->view();
     }
 

@@ -9,6 +9,7 @@
 
 namespace Core;
 
+use \Networking\Cookie;
 use \Networking\Session;
 
 class Controller
@@ -39,6 +40,12 @@ class Controller
     protected $Session = null;
 
     /**
+     * Handler class for PHP cookies
+     * @var \Networking\Cookie
+     */
+    protected $Cookie = null;
+
+    /**
      * Initialize controller
      * @param string $name Controller name
      */
@@ -48,6 +55,7 @@ class Controller
         $this->Model = new Models();
         $this->Plugin = new Plugins();
         $this->Session = new Session();
+        $this->Cookie = new Cookie();
     }
 
 }
