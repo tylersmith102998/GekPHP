@@ -13,6 +13,8 @@ class Auth extends \Core\BasePlugin
 
         $this->load_config();
 
+        //exit($this->config['tables']['users_layout']);
+
         $this->Users = $this->Model->load('users', $this->config['tables']['users_layout']);
     }
 
