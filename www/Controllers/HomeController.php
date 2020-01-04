@@ -23,6 +23,7 @@ class HomeController extends \Core\BaseController
 
     public function Index()
     {
+        
 
         $this->view();
     }

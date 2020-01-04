@@ -58,10 +58,15 @@ class Models
      *
      * If already loaded, it will simply return the object.
      *
-     * @param  string           $name Model name
-     * @return \Core\BaseModel  The model object
+     * $layout is optional, and it's only purpose is if you want to pass in a
+     * table layout from outside of the Model's scope (example: loading a table
+     * layout from a config file in a plugin.)
+     *
+     * @param  string           $name   Model name
+     * @param  array            $layout layout
+     * @return \Core\BaseModel          The model object
      */
-    public function load(string $name)
+    public function load(string $name, array $layout = [])
     {
         // Capitalize first char
         $name = ucfirst($name . 'Model');
@@ -90,7 +95,7 @@ class Models
             }
 
             // Loads class into memory.
-            $this->loaded_models[$name] = new $nsname();
+            $this->loaded_models[$name] = new $nsname($layout);
         }
 
         return $this->loaded_models[$name];
