@@ -26,6 +26,13 @@ class BasePlugin
     public $plugin_name = null;
 
     /**
+     * If plugin has a config file, this stores all of that data. Only gets
+     * filled if $this->load_config() runs correctly.
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * Models handler that will be specific to each plugin.
      * @var \Core\Models
      */
@@ -46,6 +53,18 @@ class BasePlugin
         //echo $this->plugin_dir;
 
         $this->Model = new Models($this);
+    }
+
+    protected function load_config()
+    {
+        $path = $this->plugin_dir . 'config.inc.php';
+
+        if (!file_exists($path))
+        {
+            throw new FileNotFoundException("File '{$path}' not found.", 404);
+        }
+
+        $this->config = include($path);
     }
 
 }
