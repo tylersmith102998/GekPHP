@@ -126,7 +126,7 @@ class DB
 
             // Check if column has default val
             if ($params['default'] != null)
-                $sql .= "DEFAULT {$params['default']} ";
+                $sql .= "DEFAULT '{$params['default']}' ";
 
             // Check if col should auto increment.
             if ($params['auto_inc'])
@@ -178,7 +178,7 @@ class DB
         // Check for errors, throw exception with error if found.
         if ($this->con->errno)
         {
-            throw new DBException("Query error: [{$this->con->errno}] {$this->con->error}", 1);
+            throw new DBException("Query error: [{$this->con->errno}] {$this->con->error}\nSQL Query: {$sql}", 1);
         }
 
         // Returns the Mysqli query object.
