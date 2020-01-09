@@ -52,6 +52,8 @@ class BasePlugin
         $this->plugin_dir = PLUGINS . $name . DS;
         //echo $this->plugin_dir;
 
+        $this->loadLibs();
+
         $this->Model = new Models($this);
     }
 
@@ -65,6 +67,27 @@ class BasePlugin
         }
 
         $this->config = include($path);
+    }
+
+    private function loadLibs()
+    {
+        if (isset($this -> libraries))
+        {
+            foreach ($this -> libraries as $lib => $args)
+            {
+                if ($this->lib_exists($lib))
+                {
+                    require($this->plugin_dir . '/lib/' . $lib . '.php');
+                    $ns_lib = "\\Plugins\\{$this -> plugin_name}\\Libs\\{$lib}";
+                    $this -> $lib = new $ns_lib($args);
+                }
+            }
+        }
+    }
+
+    private function lib_exists($lib)
+    {
+        return file_exists($this->plugin_dir . '/lib/' . $lib . '.php');
     }
 
 }
