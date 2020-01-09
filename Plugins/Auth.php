@@ -19,15 +19,13 @@ class Auth extends \Core\BasePlugin
 
     public function __construct()
     {
+        $this->load_config();
         parent::__construct();
 
-        $this->load_config();
+        $this->Conf->init($this->config);
 
-        //exit($this->config['tables']['users_layout']);
-
-        //$this->Conf = $this->libraries['Conf'];
-
-        $this->Users = $this->Model->load('users', $this->config['tables']['users_layout']);
+        //print_r($this->Conf->get('tables.users_layout'));
+        $this->Users = $this->Model->load('users', $this->Conf->get('tables.users_layout'));
     }
 
     public function register($data, callable $callback)
@@ -36,21 +34,18 @@ class Auth extends \Core\BasePlugin
 
         if ($this->Users->select([], ['username' => '=' . $data['username']]))
         {
-            $this->error("");
+            $this->error($this->Conf->get('registration.errors.username_exists'));
         }
 
         if ($this->Users->select([], ['email' => '=' . $data['email']]))
         {
-            $this->error("An account is already registered with that e-mail address.");
+            $this->error($this->Conf->get('registration.errors.email_exists'));
         }
 
         $data['activation_token'] = $this->generate_token();
         $data['salt'] = $this->generate_salt();
 
-        //print_r($this);
-        $this->Conf->get('fdf');
-
-        //return $callback($data);
+        return $callback($this);
     }
 
     private function error($str)

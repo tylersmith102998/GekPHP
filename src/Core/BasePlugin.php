@@ -8,6 +8,8 @@
 
 namespace Core;
 
+use \ErrorHandling\Exceptions\FileNotFoundException;
+
 class BasePlugin
 {
 
@@ -43,6 +45,13 @@ class BasePlugin
      */
     public function __construct()
     {
+        $this->loadLibs();
+
+        $this->Model = new Models($this);
+    }
+
+    protected function load_config()
+    {
         // Get the name
         $name = explode('\\', get_class($this));
         $name = array_pop($name);
@@ -52,13 +61,6 @@ class BasePlugin
         $this->plugin_dir = PLUGINS . $name . DS;
         //echo $this->plugin_dir;
 
-        $this->loadLibs();
-
-        $this->Model = new Models($this);
-    }
-
-    protected function load_config()
-    {
         $path = $this->plugin_dir . 'config.inc.php';
 
         if (!file_exists($path))
