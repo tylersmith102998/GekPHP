@@ -13,12 +13,6 @@ class Session
 {
 
     /**
-     * If PHP sessions have been started.
-     * @var bool
-     */
-    private $started = false;
-
-    /**
      * Sets a session value by name.
      * @param string $name variable name
      * @param mixed  $val  value
@@ -83,11 +77,22 @@ class Session
      */
     private function check_start()
     {
-        if (!$this->started)
+        if (!$this->session_active())
         {
             session_start();
-            $this->started = true;
         }
+    }
+
+    private function session_active()
+    {
+        if ( php_sapi_name() !== 'cli' ) {
+            if ( version_compare(phpversion(), '5.4.0', '>=') ) {
+                return session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE;
+            } else {
+                return session_id() === '' ? FALSE : TRUE;
+            }
+        }
+        return FALSE;
     }
 
 }

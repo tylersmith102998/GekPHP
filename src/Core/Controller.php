@@ -9,6 +9,7 @@
 
 namespace Core;
 
+use \HTML\Flash;
 use \Networking\Cookie;
 use \Networking\Session;
 use \Networking\Request;
@@ -53,6 +54,12 @@ class Controller
     protected $Request = null;
 
     /**
+     * Handler class for passing errors to the frontend.
+     * @var \HTML\Flash
+     */
+    protected $Flash = null;
+
+    /**
      * Initialize controller
      * @param string $name Controller name
      */
@@ -64,6 +71,7 @@ class Controller
         $this->Session = new Session();
         $this->Cookie = new Cookie();
         $this->Request = new Request();
+        $this->Flash = new Flash();
     }
 
 }
