@@ -68,7 +68,7 @@ define('SRC', ROOT . 'src' . DS);
 // MVC Resources are located here.
 define('WWW', ROOT . 'www' . DS);
 
-// Plugins will go here. Refer to parent plugin source code for how to implement 
+// Plugins will go here. Refer to parent plugin source code for how to implement
 // and build a custom plugin
 define('PLUGINS', ROOT . 'Plugins' . DS);
 
@@ -92,3 +92,22 @@ if ($R->get('r'))
     $uri = $R->get('r');
 }
 define('URI', $uri);
+
+if (!empty($_SERVER["HTTP_CLIENT_IP"]))
+{
+    //check for ip from share internet
+    $ip = $_SERVER["HTTP_CLIENT_IP"];
+}
+elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
+{
+    // Check for the Proxy User
+    $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+}
+else
+{
+    $ip = $_SERVER["REMOTE_ADDR"];
+}
+
+// This will get user's real IP Address
+// does't matter if user using proxy or not.
+define("REMOTE_IP", $ip);

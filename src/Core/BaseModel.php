@@ -217,6 +217,17 @@ class BaseModel
     }
 
     /**
+     * Deletes rows from the database.
+     * @param  array $where   The where condition
+     * @return \mysqli_result Result of the query.
+     */
+    public function delete($where)
+    {
+        $q = sprintf("DELETE FROM `%s` %s", $this->table_name, $this->parse_where($where));
+        return $this->DB->q($q);
+    }
+
+    /**
      * Takes a query object and fetches all data, if any.
      * @param  \mysqli_result $q The executed query
      * @return array             The data

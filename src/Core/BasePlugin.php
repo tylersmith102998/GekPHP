@@ -45,7 +45,8 @@ class BasePlugin
      */
     public function __construct()
     {
-        $this->loadLibs();
+        $this->load_libs();
+        $this->load_sources();
 
         $this->Model = new Models($this);
     }
@@ -71,7 +72,7 @@ class BasePlugin
         $this->config = include($path);
     }
 
-    private function loadLibs()
+    private function load_libs()
     {
         if (isset($this -> libraries))
         {
@@ -87,9 +88,28 @@ class BasePlugin
         }
     }
 
+    private function load_sources()
+    {
+        if (isset($this->sources))
+        {
+            foreach ($this->sources as $src)
+            {
+                if ($this->src_exists($src))
+                {
+                    require($this->plugin_dir . '/src/' . $src . '.php');
+                }
+            }
+        }
+    }
+
     private function lib_exists($lib)
     {
         return file_exists($this->plugin_dir . '/lib/' . $lib . '.php');
+    }
+
+    private function src_exists($src)
+    {
+        return file_exists($this->plugin_dir . '/src/' . $src . '.php');
     }
 
 }

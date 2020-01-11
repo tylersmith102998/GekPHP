@@ -12,16 +12,21 @@
 
 namespace Plugins;
 
+use \Networking\Session;
+use \Networking\Cookie;
+
+use \Plugins\Auth\Src\Account;
+
+/**
+ * Defined constants for this class.
+ */
+define('AUTH_GUEST', 0);
+define('AUTH_USER', 1);
+define('AUTH_MODERATOR', 2);
+define('AUTH_ADMIN', 3);
+
 class Auth extends \Core\BasePlugin
 {
-
-    /**
-     * Defined constants for this class.
-     */
-    const AUTH_GUEST = 0;
-    const AUTH_USER = 1;
-    const AUTH_MODERATOR = 2;
-    const AUTH_ADMIN = 3;
 
     /**
      * Holds any errors given during execution.
@@ -38,10 +43,36 @@ class Auth extends \Core\BasePlugin
     ];
 
     /**
+     * Name of sources and data structures to load in
+     * @var array
+     */
+    public $sources = [
+        'Account'
+    ];
+
+    /**
+     * Account object.
+     * @var \Plugins\Auth\Src\Account
+     */
+    public $Account = null;
+
+    /**
      * Holds the Users table model.
      * @var Plugins\Auth\Models\UsersModel
      */
     private $Users = null;
+
+    /**
+     * Holds the Sessions table model.
+     * @var Plugins\Auth\Models\SessionsModel
+     */
+    private $Sessions = null;
+
+    /**
+     * Contains an instance of the framework's Session handling class.
+     * @var \Networking\Session
+     */
+    private $Session = null;
 
     /**
      * Load config, call parent constructor, and init the libraries. Also loads
@@ -52,10 +83,163 @@ class Auth extends \Core\BasePlugin
         $this->load_config();
         parent::__construct();
 
+        // Initialize the library.
         $this->Conf->init($this->config);
+
+        // Set instances of PHP Session and Cookie handlers.
+        $this->Session = new Session();
+        $this->Cookie = new Cookie();
 
         //print_r($this->Conf->get('tables.users_layout'));
         $this->Users = $this->Model->load('users', $this->Conf->get('tables.users_layout'));
+        $this->Sessions = $this->Model->load('sessions', $this->Conf->get('tables.sessions_layout'));
+
+        // Finalized. Find an existing session
+        $this->login_from_session();
+    }
+
+    /**
+     * Destroys the user's current login sesion.
+     * @return void
+     */
+    public function logout()
+    {
+        $Session = $this->get_local_session();
+
+        if ($Session->valid)
+        {
+            $this->kill_session($Session->token);
+            $this->redirect($this->Conf->get('routes.logout'));
+        }
+    }
+
+    /**
+     * Restricts a page's access to a certain permission group, and redirects
+     * the user if they do not fall within the category provided. Makes use of
+     * the constants defined before class declaration.
+     *
+     * @param  int     $min_perm_level  Minimum permission level.
+     * @param  int     $max_perm_level  Maximum permission level.
+     * @param  string  $redirect        Where the application should redirect the user if this test fails.
+     * @return void
+     */
+    public function restrict($min_perm_level, $max_perm_level = AUTH_ADMIN, $redirect = null)
+    {
+        // If no redirect passed, redirect to the login page.
+        if ($redirect == null)
+        {
+            $redirect = $this->Conf->get('routes.login');
+        }
+
+        // Establish default of AUTH_GUEST, but check account for otherwise.
+        $perm_level = AUTH_GUEST;
+        if (isset($this->Account) && !empty($this->Account))
+        {
+            $perm_level = $this->Account->permission_level;
+        }
+
+        //var_dump($perm_level);
+
+        if (($perm_level >= $min_perm_level) && ($perm_level <= $max_perm_level))
+        {
+            // Do nothing
+        }
+        else
+        {
+            // TODO: Redirect and set session for error message to that redirect page.
+            $this->redirect($redirect);
+        }
+    }
+
+    /**
+     * Attempts to authenticate a user based off a session token.
+     * @return void
+     */
+    public function login_from_session()
+    {
+        $Session = $this->get_local_session();
+
+        if ($Session->valid)
+        {
+            $token = $Session->token;
+
+            $Sq = $this->Sessions->get([], ['token' => ['=', $token]]);
+
+            if (!empty($Sq))
+            {
+                //exit(print_r($Sq));
+                $Session = (object) $Sq[0];
+
+                $Uq = $this->Users->get([], ['id' => ['=', $Session->user_id]]);
+
+                $this->logged_in = true;
+                $this->Account = new Account($Uq[0]);
+
+                $update = [
+                    "last_access_time" => time(),
+                    "last_page_loaded" => URI
+                ];
+
+                $w = [
+                    'token' => ['=', $Session->token]
+                ];
+
+                $this->Sessions->update($update, $w);
+                $this->refresh_cookie($Session->token);
+            }
+        }
+    }
+
+    /**
+     * Attempts to log a user in, and if a correct combination of credentials
+     * are provided, it will establish the user's login session.
+     *
+     * @param  array    $data      login credentials and remember me functionality
+     * @param  callable $callback  The callback function which we will pass error information back to.
+     * @return mixed               The result of the callback function.
+     */
+    public function login($data, callable $callback)
+    {
+        // Query table for results and establish defaults.
+        $Eq = $this->Users->select([], ['email' => ['=', $data['email']]]);
+        $ret = $this->cb_obj();
+        $remember = false;
+
+        // Check if remember me box result is passed.
+        if (isset($data['_remember']))
+        {
+            $remember = $data['_remember'];
+            unset($data['_remember']);
+        }
+
+        // Checks if the account couldn't be found by email.
+        if (empty($Eq))
+        {
+            $this->error($this->Conf->get('login.errors.invalid_credentials'));
+            $ret->error = true;
+            $ret->message = $this->errors;
+        }
+        else
+        {
+            // If account was found:
+            $account = $Eq[0];
+
+            // Verify the password matches.
+            if (!password_verify($data['password'], $account['password']))
+            {
+                $this->error($this->Conf->get('login.errors.invalid_credentials'));
+                $ret->error = true;
+                $ret->message = $this->errors;
+            }
+            else
+            {
+                // Successful login.
+                $account = new Account($account);
+                $this->generate_session($account, $remember, $ret);
+            }
+        }
+
+        return $callback($ret);
     }
 
     /**
@@ -72,7 +256,7 @@ class Auth extends \Core\BasePlugin
      *
      * @param  array    $data     The data the user entered into form fields.
      * @param  callable $callback This function will be called upon completion of execution. Data $d is passed in.
-     * @return callable           Execution result of the callback function.
+     * @return mixed              Execution result of the callback function.
      */
     public function register($data, callable $callback)
     {
@@ -121,13 +305,192 @@ class Auth extends \Core\BasePlugin
             if (!$this->Users->insert($data))
             {
                 $ret['error'] = true;
-                $ret['message'] = $this->Conf->get('registration.errors.connection');
+                $ret['message'] = $this->Conf->get('database.errors.connection');
                 //$this->error($this->Conf->get('registration.errors.connection'));
             }
         }
 
         // Call the callback function and pass return values to it.
         return $callback($ret);
+    }
+
+    /**
+     * Refreshes the cookie with new expiry time.
+     * @param  string $token session token
+     * @return void
+     */
+    private function refresh_cookie($token)
+    {
+        $this->Cookie->set($this->plugin_name, $token, $this->Conf->get('sessions.cookie_expiry'));
+    }
+
+    /**
+     * Redirects the application user to the uri provided.
+     * @param  string $uri URI to redirect to.
+     * @return void
+     */
+    public function redirect($uri)
+    {
+        header("Location: {$uri}");
+    }
+
+    /**
+     * Generates a session based off the account info and remember me box value.
+     *
+     * Errors can happen here, which is why we have passed a return object by
+     * reference, so we can update the same instance of the object without
+     * having to return it back to the calling method.
+     *
+     * @param  stdClass $Account  the account information
+     * @param  bool     $remember whether or not to store your token in a cookie
+     * @param  stdClass $ret      return object for error reporting
+     * @return void
+     */
+    private function generate_session($Account, $remember, &$ret)
+    {
+        $time = time();
+        $remember_s = ($remember) ? '1' : '0';
+
+        $session = [
+            'token' => $this->generate_token(),
+            'user_id' => $Account->id,
+            'ip_address' => REMOTE_IP,
+            'creation_date' => $time,
+            'last_access_time' => $time,
+            'last_page_loaded' => URI,
+            'remembered' => $remember_s
+        ];
+
+        $Sq = $this->Sessions->insert($session);
+
+        if (!$Sq)
+        {
+            $this->error($this->Conf->get('database.errors.connection'));
+            $ret->error = true;
+            $ret->message = $this->errors;
+        }
+        else
+        {
+            $this->kill_expired_sessions();
+            $this->kill_expired_local_sessions();
+            $this->establish_session((object) $session, $remember);
+        }
+    }
+
+    /**
+     * Kills expired sessions based on the cookie expiry config value.
+     *
+     * This method gets called every time Auth generates a session.
+     *
+     * TODO: Add config value to disable this feature. You might want to disable
+     *       this in big datasets, and just use cronjobs to occasionally clean
+     *       up the sessions table.
+     *
+     * @return void
+     */
+    private function kill_expired_sessions()
+    {
+        $w = [
+            'last_access_time' => ['<', time() - $this->Conf->get('sessions.cookie_expiry')]
+        ];
+
+        $Sq = $this->Sessions->delete($w);
+    }
+
+    /**
+     * Kills any local sessions that are expired.
+     * @return void
+     */
+    private function kill_expired_local_sessions()
+    {
+        $Session = $this->get_local_session();
+
+        if ($Session->valid)
+        {
+            $token = $Session->token;
+
+            $w = [
+                '_logic' => 'AND',
+                'token' => ['=', $token],
+                'last_access_time' => ['<', time() - $this->Conf->get('sessions.cookie_expiry')]
+            ];
+
+            $Sq = $this->Sessions->get([], $w);
+            if (!empty($Sq))
+            {
+                $Sq = $this->Sessions->delete($w);
+                $this->Session->destroy($this->plugin_name);
+            }
+        }
+    }
+
+    /**
+     * Gets a user's local session.
+     * @return stdClass Session object.
+     */
+    private function get_local_session()
+    {
+        // Set default.
+        $Session = (object) [
+            'valid' => false
+        ];
+
+        // Check for session, then cookie, finally init token to 0 if not set.
+        if ($php_sesh = $this->Session->get($this->plugin_name))
+        {
+            $token = $php_sesh;
+        }
+        else if ($php_cookie = $this->Cookie->get($this->plugin_name))
+        {
+            $token = $php_cookie;
+        }
+        else
+        {
+            $token = '0';
+        }
+
+        // Fetch from DB
+        $Sq = $this->Sessions->get([], ['token' => ['=', $token]]);
+
+        // If session IS valid.
+        if (!empty($Sq))
+        {
+            $Session = (object) $Sq[0];
+        }
+
+        return $Session;
+    }
+
+    /**
+     * Establishes the PHP session, and if $remember == true, the cookie.
+     * @param  \Networking\Session  $Session  Gek Session handler.
+     * @param  boolean              $remember Whether to use cookies or not.
+     * @return void
+     */
+    private function establish_session($Session, $remember = false)
+    {
+        $this->Session->set($this->plugin_name, $Session->token);
+
+        if ($remember)
+        {
+            $this->Cookie->set($this->plugin_name, $Session->token,
+                $this->Conf->get("sessions.cookie_expiry"));
+        }
+    }
+
+    /**
+     * Returns a template object for return objects to the callback functions.
+     * @return stdClass Callback Object template.
+     */
+    private function cb_obj()
+    {
+        return (object) [
+            'error' => false,
+            'message' => [],
+            'redirect' => function($uri) {
+                header("Location: {$uri}");
+            }
+        ];
     }
 
     /**
