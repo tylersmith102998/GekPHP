@@ -28,9 +28,15 @@ class BaseController extends Controller
         $this->view_path = strtolower(
             str_replace(['Controllers\\', 'Controller'], '', $controller_name) .
             DS . strtolower($method));
-        $this->args = $args;
+        $this->args = $args->args;
 
         parent::__construct();
+
+        if ($args->_404)
+        {
+            // Handle 404
+            exit('404');
+        }
 
         // Load in plugins optionally to the whole site.
         // To get this functionality on a per-controller basis, copy-paste the
