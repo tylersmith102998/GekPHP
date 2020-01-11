@@ -18,6 +18,7 @@ class Auth extends \Core\BasePlugin
     /**
      * Defined constants for this class.
      */
+    const AUTH_GUEST = 0;
     const AUTH_USER = 1;
     const AUTH_MODERATOR = 2;
     const AUTH_ADMIN = 3;
