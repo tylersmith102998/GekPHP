@@ -185,4 +185,14 @@ class DB
         return $q;
     }
 
+    /**
+     * Alias for \mysqli::real_escape_string
+     * @param  string $data the snippet of data to escape.
+     * @return string       escaped data
+     */
+    public function escape($data)
+    {
+        return $this->con->real_escape_string($data);
+    }
+
 }

@@ -97,6 +97,8 @@ class BaseModel
         $data_cols = "";
         $data_vals = "";
 
+        $data = $this->escape($data);
+
         // Construct the strings for columns and vals.
         foreach ($data as $col => $val)
         {
@@ -132,6 +134,8 @@ class BaseModel
         // Initialize variables
         $data_str = "";
         $table = $this->table_name;
+
+        $data = $this->escape($data);
 
         // Format data
         foreach ($data as $col => $val)
@@ -308,6 +312,7 @@ class BaseModel
                 $op = $cond[0];
             }
 
+            $cond[1] = $this->escape($cond[1]);
             $val = "'{$cond[1]}'";
 
             // Print differently if _logic key was supplied.
@@ -338,6 +343,30 @@ class BaseModel
         //echo $where_str;
 
         return $where_str;
+    }
+
+    /**
+     * Allows access to the DB escape function. Can pass either a whole array
+     * of data, or you can pass just one string.
+     *
+     * @param  string|array $data data to escape
+     * @return string|array       escaped data, either array or string depending on what was passed.
+     */
+    public function escape($data)
+    {
+        if (is_array($data))
+        {
+            foreach ($col as $val)
+            {
+                $data[$col] = $this->DB->escape($val);
+            }
+
+            return $data;
+        }
+        else
+        {
+            return $this->DB->escape($data);
+        }
     }
 
 }
