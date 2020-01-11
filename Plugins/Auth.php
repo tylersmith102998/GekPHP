@@ -260,6 +260,8 @@ class Auth extends \Core\BasePlugin
      */
     public function register($data, callable $callback)
     {
+        $ret = $this->cb_obj();
+
         if ($this->check_email_taken($data['email']))
         {
             $this->error($this->Conf->get('registration.errors.email_exists'));
@@ -289,23 +291,19 @@ class Auth extends \Core\BasePlugin
         // Check if any errors generated.
         if ($this->errors != [])
         {
-            $ret = [
-                'error' => true,
-                'message' => $this->errors
-            ];
+            $ret->error = true;
+            $ret->message = $this->errors;
         }
         else
         {
-            $ret = [
-                'error' => false,
-                'message' => [$this->Conf->get('registration.success')]
-            ];
+            $ret->error = false;
+            $ret->message = [$this->Conf->get('registration.success')];
 
             // If we are unable to insert user data due to query or connection error, write that error.
             if (!$this->Users->insert($data))
             {
-                $ret['error'] = true;
-                $ret['message'] = $this->Conf->get('database.errors.connection');
+                $ret->error = true;
+                $ret->message = $this->Conf->get('database.errors.connection');
                 //$this->error($this->Conf->get('registration.errors.connection'));
             }
         }
@@ -493,9 +491,6 @@ class Auth extends \Core\BasePlugin
         return (object) [
             'error' => false,
             'message' => [],
-            'redirect' => function($uri) {
-                header("Location: {$uri}");
-            }
         ];
     }
 
