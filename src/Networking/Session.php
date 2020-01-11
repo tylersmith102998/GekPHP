@@ -48,6 +48,35 @@ class Session
     }
 
     /**
+     * Destroys a specific session by name.
+     * @param  string $name name of the session
+     * @return bool         whether the operation was successful
+     */
+    public function destroy($name)
+    {
+        $this->check_start();
+
+        if (isset($_SESSION[$name]))
+        {
+            unset($_SESSION[$name]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Destroys all sessions.
+     * @return void
+     */
+    public function destroy_all()
+    {
+        $this->check_start();
+
+        session_destroy();
+    }
+
+    /**
      * Checks to see if PHP sessions have been started and starts them if they
      * haven't.
      * @return void

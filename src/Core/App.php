@@ -56,7 +56,7 @@ class App
         // These initialization functions can throw errors. Catch them.
         try
         {
-            $this -> DB = new DB(Config::load('database.php'));
+            $this -> DB = new DB(Config::load('database'));
             ClassRegistry::load('DB', $this -> DB);
         }
         // Remove FileNotFoundException??

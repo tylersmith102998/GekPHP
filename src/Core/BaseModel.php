@@ -199,6 +199,7 @@ class BaseModel
         $data = $this->query_fetch_all($this->DB->q($sql));
 
         // Return false if no data is present, or the data if it is.
+        //exit(var_dump($this->parse_where($where)));
         return (empty($data)) ? false : $data;
     }
 
@@ -213,6 +214,17 @@ class BaseModel
     public function get(array $fields, $where, $limit = null, $order_by = null)
     {
         return $this->select($fields, $where, $limit, $order_by);
+    }
+
+    /**
+     * Deletes rows from the database.
+     * @param  array $where   The where condition
+     * @return \mysqli_result Result of the query.
+     */
+    public function delete($where)
+    {
+        $q = sprintf("DELETE FROM `%s` %s", $this->table_name, $this->parse_where($where));
+        return $this->DB->q($q);
     }
 
     /**

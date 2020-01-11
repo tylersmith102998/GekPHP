@@ -7,29 +7,24 @@ use ErrorHandling\Exceptions\FileNotFoundException;
 class HomeController extends \Core\BaseController
 {
 
-    private $U = null;
-
     public function __construct($method, $args)
     {
         parent::__construct($method, $args);
-
-        try {
-            //$this->U = $this->Model->load('users');
-            $this->A = $this->Plugin->load('Auth');
-        } catch (FileNotFoundException $e) {
-            exit($e);
-        }
     }
 
-    public function Index()
+    // Index method is always ucfirst.
+    public function Index() // /home/index
     {
+        // Pre-process data.
 
         $this->view();
     }
 
-    public function About($args)
+    public function mysecondpage() // /home/mysecondpage
     {
-        echo 'This is the about page';
+        // Pre-process data.
+
+        $this->view();
     }
 
 }

@@ -8,6 +8,8 @@
 
 namespace Core;
 
+use \ErrorHandling\Exceptions\FileNotFoundException;
+
 class BasePlugin
 {
 
@@ -26,6 +28,13 @@ class BasePlugin
     public $plugin_name = null;
 
     /**
+     * If plugin has a config file, this stores all of that data. Only gets
+     * filled if $this->load_config() runs correctly.
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * Models handler that will be specific to each plugin.
      * @var \Core\Models
      */
@@ -36,6 +45,14 @@ class BasePlugin
      */
     public function __construct()
     {
+        $this->load_libs();
+        $this->load_sources();
+
+        $this->Model = new Models($this);
+    }
+
+    protected function load_config()
+    {
         // Get the name
         $name = explode('\\', get_class($this));
         $name = array_pop($name);
@@ -45,7 +62,54 @@ class BasePlugin
         $this->plugin_dir = PLUGINS . $name . DS;
         //echo $this->plugin_dir;
 
-        $this->Model = new Models($this);
+        $path = $this->plugin_dir . 'config.inc.php';
+
+        if (!file_exists($path))
+        {
+            throw new FileNotFoundException("File '{$path}' not found.", 404);
+        }
+
+        $this->config = include($path);
+    }
+
+    private function load_libs()
+    {
+        if (isset($this -> libraries))
+        {
+            foreach ($this -> libraries as $lib => $args)
+            {
+                if ($this->lib_exists($lib))
+                {
+                    require($this->plugin_dir . '/lib/' . $lib . '.php');
+                    $ns_lib = "\\Plugins\\{$this -> plugin_name}\\Libs\\{$lib}";
+                    $this -> $lib = new $ns_lib($args);
+                }
+            }
+        }
+    }
+
+    private function load_sources()
+    {
+        if (isset($this->sources))
+        {
+            foreach ($this->sources as $src)
+            {
+                if ($this->src_exists($src))
+                {
+                    require($this->plugin_dir . '/src/' . $src . '.php');
+                }
+            }
+        }
+    }
+
+    private function lib_exists($lib)
+    {
+        return file_exists($this->plugin_dir . '/lib/' . $lib . '.php');
+    }
+
+    private function src_exists($src)
+    {
+        return file_exists($this->plugin_dir . '/src/' . $src . '.php');
     }
 
 }

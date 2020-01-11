@@ -21,7 +21,7 @@ class Cookie
      * @param integer $exp  time in seconds cookie should last for
      * @param string  $path optional path that cookie is utilized in
      */
-    public function set(string $name, $val, int $exp = 86400, $path = '/')
+    public function set(string $name, $val = "", int $exp = 86400, $path = '/')
     {
         return setcookie($name, $val, time() + $exp, $path);
     }
@@ -39,6 +39,33 @@ class Cookie
         }
 
         return false;
+    }
+
+    /**
+     * Destroys a cookie given the name.
+     * @param  string $name name of the cookie
+     * @return bool         whether the operation was successful or not
+     */
+    public function destroy($name)
+    {
+        if (isset($_COOKIE[$name]))
+        {
+            return $this->set($name, "", -1);
+        }
+
+        return false;
+    }
+
+    /**
+     * Destroys all PHP cookies.
+     * @return void
+     */
+    public function destroy_all()
+    {
+        foreach ($_COOKIE as $cookie)
+        {
+            $this->destroy($cookie);
+        }
     }
 
 }
