@@ -361,7 +361,7 @@ class Auth extends \Core\BasePlugin
             'browser_info' => "{$browser}, version {$version} (Running on {$platform})",
             'creation_date' => $time,
             'last_access_time' => $time,
-            'last_page_loaded' => URI,
+            'last_page_loaded' => '/' . URI,
             'remembered' => $remember_s
         ];
 
