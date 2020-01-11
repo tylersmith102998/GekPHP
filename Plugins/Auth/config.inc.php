@@ -48,6 +48,9 @@ $config['tables']['sessions_layout'] = [
     "ip_address" => [
         "data_type" => "varchar(15)"
     ],
+    "browser_info" => [
+        "data_type" => "text"
+    ],
     "creation_date" => [
         "data_type" => "bigint"
     ],

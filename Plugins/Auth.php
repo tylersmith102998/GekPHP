@@ -351,10 +351,16 @@ class Auth extends \Core\BasePlugin
         $time = time();
         $remember_s = ($remember) ? '1' : '0';
 
+        $b_info = get_browser($_SERVER['HTTP_USER_AGENT']);
+        $browser = $b_info->browser;
+        $version = $b_info->version;
+        $platform = $b_info->platform;
+
         $session = [
             'token' => $this->generate_token(),
             'user_id' => $Account->id,
             'ip_address' => REMOTE_IP,
+            'browser_info' => "{$browser}, version {$version} (Running on {$platform})",
             'creation_date' => $time,
             'last_access_time' => $time,
             'last_page_loaded' => URI,
