@@ -31,6 +31,15 @@ class BaseController extends Controller
         $this->args = $args;
 
         parent::__construct();
+
+        // Load in plugins optionally to the whole site.
+        // To get this functionality on a per-controller basis, copy-paste the
+        // code below to the controller in question.
+        try {
+            $this->Auth = $this->Plugin->load('Auth');
+        } catch (FileNotFoundException $e) {
+            exit($e);
+        }
     }
 
     /**

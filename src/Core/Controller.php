@@ -11,6 +11,7 @@ namespace Core;
 
 use \Networking\Cookie;
 use \Networking\Session;
+use \Networking\Request;
 
 class Controller
 {
@@ -46,6 +47,12 @@ class Controller
     protected $Cookie = null;
 
     /**
+     * Handler class for HTTP requests.
+     * @var \Networking\Request
+     */
+    protected $Request = null;
+
+    /**
      * Initialize controller
      * @param string $name Controller name
      */
@@ -56,6 +63,7 @@ class Controller
         $this->Plugin = new Plugins();
         $this->Session = new Session();
         $this->Cookie = new Cookie();
+        $this->Request = new Request();
     }
 
 }
