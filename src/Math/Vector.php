@@ -38,8 +38,8 @@ class Vector
      */
     public function __construct(...$values)
     {
-        $this->vect = $values;
-        $this->length = count($values);
+        $this->vect = $values[0];
+        $this->length = count($values[0]);
         $this->T = $this->transpose();
         //var_dump($values);
         //exit();
@@ -162,7 +162,19 @@ class Vector
 
         for ($i = 0; $i < $this->length; $i++)
         {
-            $str .= "\t[{$this->get($i)}]";
+            $str .= "[{$this->get($i)}]\n";
+        }
+
+        echo $str . "</pre>";
+    }
+
+    public function printT()
+    {
+        $str = "<pre>\\Math\\Vector (Transpose):\n";
+
+        for ($i = 0; $i < $this->length; $i++)
+        {
+            $str .= "[{$this->get($i)}]\t";
         }
 
         echo $str . "</pre>";
