@@ -7,6 +7,8 @@ use ErrorHandling\Exceptions\ControllerNotFoundException;
 class Router
 {
 
+    public $_404 = false;
+
     /**
      * Name of the controller to use. Assigned in Core\Router::breakDownRoute();
      * @var string
@@ -23,7 +25,9 @@ class Router
      * Arguments to pass to the controller and method. Assigned in Core\Router::breakDownRoute();
      * @var array
      */
-    private $args = [];
+    public $args = [];
+
+    public $route = null;
 
     /**
      * Initializes the router to get us to the correct page.
@@ -33,6 +37,7 @@ class Router
      */
     public function __construct(string $route)
     {
+        $this->route = $route;
         try {
             $this->breakDownRoute($route);
         } catch (ControllerNotFoundException $e) {
@@ -48,7 +53,7 @@ class Router
     {
         $controller = "\\Controllers\\" . $this->controllerName;
         $method = $this->methodName;
-        $args = $this->args;
+        $args = $this;
 
         $C = new $controller($method, $args);
         $C->$method();
@@ -82,7 +87,9 @@ class Router
 
         if (!$this->checkControllerExists($controller))
         {
-            throw new ControllerNotFoundException("Controller '{$controller}.php' not found in " . CONTROLLERS, 404);
+            //throw new ControllerNotFoundException("Controller '{$controller}.php' not found in " . CONTROLLERS, 404);
+            $controller = "HomeController";
+            $this->_404 = true;
         }
 
         // Check for method name. if set, assign it. If not, 'index' is used.
@@ -100,7 +107,9 @@ class Router
 
         if (!$this -> checkControllerMethodExists($controller, $method))
         {
-            throw new ControllerNotFoundException("Method {$method} is not a member of controller {$controller}", 405);
+            $method = "Index";
+            $this->_404 = true;
+            //throw new ControllerNotFoundException("Method {$method} is not a member of controller {$controller}", 405);
         }
 
         // Check for args, if so, use them. If not, empty array.
