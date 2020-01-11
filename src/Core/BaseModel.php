@@ -199,6 +199,7 @@ class BaseModel
         $data = $this->query_fetch_all($this->DB->q($sql));
 
         // Return false if no data is present, or the data if it is.
+        //exit(var_dump($this->parse_where($where)));
         return (empty($data)) ? false : $data;
     }
 
